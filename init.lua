@@ -4,36 +4,37 @@
 -- SPDX-License-Identifier: AGPL-3.0-or-later
 
 local S = minetest.get_translator("advtrains_ks_sh2")
-local rotation_sbox = { -1 / 4, -1 / 2, -1 / 4, 1 / 4, -7 / 16, 1 / 4 }
 local rtn_sh2_aspect = function()
     return advtrains.interlocking.DANGER
 end
 
 advtrains.trackplacer.register_tracktype("advtrains_ks_sh2:sh2")
 for _, rtab in ipairs({
-    { rot = "0",  sbox = { -1 / 8, -1 / 2, -1 / 2, 1 / 8, 1 / 2, -1 / 4 },  ici = true },
-    { rot = "30", sbox = { -3 / 8, -1 / 2, -1 / 2, -1 / 8, 1 / 2, -1 / 4 }, },
-    { rot = "45", sbox = { -1 / 2, -1 / 2, -1 / 2, -1 / 4, 1 / 2, -1 / 4 }, },
-    { rot = "60", sbox = { -1 / 2, -1 / 2, -3 / 8, -1 / 4, 1 / 2, -1 / 8 }, },
+    { rot = "0",  r = 0, ici = true },
+    { rot = "30", r = math.atan(1/2) },
+    { rot = "45", r = math.rad(45) },
+    { rot = "60", r = math.atan(2) },
 }) do
+    local box_bound = 1/16*math.sqrt(2)*math.max(math.sin(rtab.r+math.rad(45)), math.cos(rtab.r+math.rad(45)))
+    local sbox = {-box_bound, -1/2, -box_bound, box_bound, 1, box_bound}
     minetest.register_node("advtrains_ks_sh2:sh2_sh2_" .. rtab.rot, {
         description = S("Ks Sh2 Signal"),
         drawtype = "mesh",
-        mesh = "advtrains_signals_ks_sign_smr" .. rtab.rot .. ".obj",
-        tiles = { "advtrains_signals_ks_signpost.png", "advtrains_ks_sh2_sh2.png" },
+        mesh = "advtrains_ks_sh2_smr" .. rtab.rot .. ".obj",
+        tiles = { "advtrains_ks_sh2_sh2.png" },
 
         paramtype = "light",
         sunlight_propagates = true,
-        light_source = 4,
+        -- light_source = 4,
 
         paramtype2 = "facedir",
         selection_box = {
             type = "fixed",
-            fixed = { rtab.sbox, rotation_sbox }
+            fixed = sbox,
         },
         collision_box = {
             type = "fixed",
-            fixed = rtab.sbox,
+            fixed = sbox,
         },
         groups = {
             cracky = 2,
@@ -43,7 +44,7 @@ for _, rtab in ipairs({
             not_in_creative_inventory = rtab.ici and 0 or 1,
         },
         drop = "advtrains_ks_sh2:sh2_sh2_0",
-        inventory_image = "advtrains_ks_sh2_sh2.png",
+        inventory_image = "[combine:38x30:-2,0=advtrains_ks_sh2_sh2.png",
         advtrains = {
             get_aspect = rtn_sh2_aspect
         },
